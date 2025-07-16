@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Voir POV synchronisée</title>
+  <style>
+    body {
+      background-color: #111;
+      color: #eee;
+      font-family: sans-serif;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    select {
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 5px;
+      border: none;
+      margin-bottom: 20px;
+    }
+
+    iframe {
+      width: 100%;
+      max-width: 800px;
+      height: 450px;
+      border: none;
+      margin-bottom: 30px;
+    }
+
+    .timeline {
+      position: relative;
+      width: 100%;
+      max-width: 800px;
+      height: 8px;
+      background-color: #444;
+      margin: 0 auto 20px;
+      border-radius: 4px;
+    }
+
+    .mark {
+      position: absolute;
+      top: -6px;
+      width: 2px;
+      height: 20px;
+      background-color: red;
+    }
+
+    .info {
+      font-size: 14px;
+      color: #ccc;
+      margin-top: 10px;
+    }
+
+    .empty {
+      margin-top: 40px;
+      font-size: 16px;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>📺 Lecture synchronisée</h1>
+  <select id="jourSelect">
+    <option value="">Sélectionner un jour</option>
+    ${[...Array(14)].map((_, i) => `<option value="Jour ${i + 1}">Jour ${i + 1}</option>`).join('')}
+  </select>
+
+  <div id="playerContainer"></div>
+  <div class="timeline" id="timeline"><div class="mark" id="marque" style="display:none;"></div></div>
+  <div class="info" id="syncInfo"></div>
+  <div class="empty" id="emptyMsg" style="display:none;">Aucune synchronisation disponible</div>
+
+  <script>
+    document.getElementById("jourSelect").addEventListener("change", function () {
+      const jour = this.value;
+      const data = localStorage.getItem("sync_" + jour);
+      const playerContainer = document.getElementById("playerContainer");
+      const marque = document.getElementById("marque");
+      const syncInfo = document.getElementById("syncInfo");
+      const emptyMsg = document.getElementById("emptyMsg");
+
+      if (!data) {
+        playerContainer.innerHTML = "";
+        marque.style.display = "none";
+        syncInfo.innerText = "";
+        emptyMsg.style.display = "block";
+        return;
+      }
+
+      emptyMsg.style.display = "none";
+      const sync = JSON.parse(data);
+      const videoId = extraireID(sync.videoSync);
+      const tsSync = parseTime(sync.timestampSync);
+      const videoDurSec = 7200; // base 2h
+      const timelineWidth = document.getElementById("timeline").offsetWidth;
+      const x = (tsSync / videoDurSec) * timelineWidth;
+
+      marque.style.display = "block";
+      marque.style.left = `${x}px`;
+
+      playerContainer.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}" allowfullscreen></iframe>`;
+      syncInfo.innerText = `📌 Timestamp synchronisé : ${sync.timestampSync} ➜ Heure IRL estimée : ${sync.irlSync}`;
+    });
+
+    function parseTime(str) {
+      const [m, s] = str.split(":").map(Number);
+      return m * 60 + s;
+    }
+
+    function extraireID(url) {
+      const ytMatch = url.match(/(?:v=|\/embed\/|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+      return ytMatch ? ytMatch[1] : null;
+    }
+  </script>
+
+</body>
+</html>

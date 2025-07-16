@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>SynchroPOV</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #000;
+      color: #eee;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    img.logo {
+      width: 180px;
+      margin-bottom: 30px;
+    }
+
+    .container {
+      display: flex;
+      gap: 40px;
+    }
+
+    .box {
+      width: 300px;
+      height: 200px;
+      background-color: #1a1a1a;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(255,255,255,0.05);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      transition: transform 0.3s;
+      color: #eee;
+    }
+
+    .box:hover {
+      transform: scale(1.05);
+    }
+
+    .box h2 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    .box p {
+      margin-top: 10px;
+      font-size: 14px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 🔗 Ton logo ici -->
+  <img src="logo.png" alt="Logo SynchroPOV" class="logo">
+
+  <div class="container">
+    <div class="box" onclick="alert('Voir POV: bientôt disponible')">
+      <h2>👁️ Voir POV</h2>
+      <p>Explorer les vidéos synchronisées</p>
+    </div>
+    <div class="box" onclick="alert('Synchroniser POV: bientôt disponible')">
+      <h2>🧭 Synchroniser POV</h2>
+      <p>Ajouter ma position et les croisements</p>
+    </div>
+  </div>
+
+</body>
+</html>
