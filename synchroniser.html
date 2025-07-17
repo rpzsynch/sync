@@ -4,212 +4,184 @@
   <meta charset="UTF-8">
   <title>Synchroniser POV</title>
   <style>
-    * { box-sizing: border-box; }
-
     body {
-      margin: 0;
-      padding: 20px;
-      background-color: #000;
+      background-color: #121212;
       color: #eee;
       font-family: sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      height: 100vh;
-      overflow: hidden;
+      padding: 30px;
+      text-align: center;
     }
 
-    .videos {
-      display: flex;
+    h1 {
+      margin-bottom: 30px;
+      color: #00ffd0;
+    }
+
+    form {
+      max-width: 500px;
+      margin: auto;
+      text-align: left;
+      background-color: #1a1a1a;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #000;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    input, select {
       width: 100%;
-      height: 55vh;
-    }
-
-    .video-block {
-      flex: 1;
-    }
-
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
-
-    .edit-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      width: 100%;
-      max-width: 1200px;
-      margin-top: 10px;
-    }
-
-    .edit-group {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      width: 30%;
-    }
-
-    .center-group {
-      width: 30%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-    }
-
-    input[type="text"], button, select, input[type="time"] {
       padding: 10px;
-      font-size: 16px;
+      font-size: 14px;
       border-radius: 5px;
       border: none;
-      width: 100%;
-      margin-bottom: 10px;
+      background-color: #333;
+      color: #fff;
     }
 
-    #saveBtn {
-      margin-top: 25px;
-      padding: 18px 35px;
-      font-size: 22px;
+    button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: none;
       background-color: #28a745;
       color: white;
-      border: none;
-      border-radius: 10px;
       cursor: pointer;
+      transition: background-color 0.3s;
     }
 
-    #saveBtn:hover {
+    button:hover {
       background-color: #218838;
     }
 
-    #resultat {
-      text-align: center;
+    .msg {
       margin-top: 15px;
-      font-size: 16px;
+      font-size: 14px;
+      color: #8f8;
+      text-align: center;
     }
 
-    @media (max-width: 900px) {
-      .videos {
-        flex-direction: column;
-        height: auto;
-      }
+    .back {
+      margin-bottom: 20px;
+      text-align: left;
+    }
 
-      .edit-row {
-        flex-direction: column;
-        gap: 20px;
-        align-items: center;
-      }
+    .back a {
+      color: #28a745;
+      text-decoration: none;
+      font-size: 14px;
+      border: 1px solid #28a745;
+      padding: 6px 10px;
+      border-radius: 6px;
+    }
 
-      .edit-group, .center-group {
-        width: 100%;
-      }
-
-      #saveBtn {
-        width: 100%;
-        max-width: 320px;
-      }
+    .back a:hover {
+      background-color: #28a745;
+      color: white;
     }
   </style>
 </head>
 <body>
 
-  <div class="videos">
-    <div class="video-block">
-      <iframe id="videoA" src="https://www.youtube.com/embed/" allowfullscreen></iframe>
-    </div>
-    <div class="video-block">
-      <iframe id="videoB" src="https://www.youtube.com/embed/" allowfullscreen></iframe>
-    </div>
+  <!-- 🔙 Bouton retour à l’accueil -->
+  <div class="back">
+    <a href="index.html">← Retour à l’accueil</a>
   </div>
 
-  <div class="edit-row">
-    <div class="edit-group">
-      <input type="text" id="urlA" placeholder="Vidéo à synchroniser">
-      <button onclick="changerVideo('videoA', 'urlA')">🔗 Modifier gauche</button>
-      <input type="text" id="timestampSync" placeholder="Timestamp dans vidéo à synchroniser (ex: 01:52)">
+  <h1>🧭 Synchroniser deux POVs</h1>
+
+  <form id="syncForm">
+
+    <!-- 🧩 Champs Jour + Heure IRL sur une ligne -->
+    <div style="display: flex; gap: 20px;">
+      <div style="flex: 1;">
+        <label for="jour">📅 Jour</label>
+        <select id="jour" required style="width: 100%;">
+          <option value="">Sélectionner...</option>
+          ${[...Array(14)].map((_, i) => `<option value="Jour ${i + 1}">Jour ${i + 1}</option>`).join('')}
+        </select>
+      </div>
+      <div style="flex: 1;">
+        <label for="irlEtalon">🕰️ Heure IRL du croisement (HH:mm:ss)</label>
+        <input type="text" id="irlEtalon" placeholder="ex: 18:42:16" required style="width: 100%;">
+      </div>
     </div>
 
-    <div class="center-group">
-      <select id="jour">
-        <option value="">Jour</option>
-        ${[...Array(14)].map((_, i) => `<option value="Jour ${i + 1}">Jour ${i + 1}</option>`).join('')}
-      </select>
-      <input type="time" id="heureIRL">
-    </div>
+    <label for="videoSync">📹 Lien de la vidéo à synchroniser</label>
+    <input type="text" id="videoSync" placeholder="https://youtube.com/..." required>
 
-    <div class="edit-group">
-      <input type="text" id="urlB" placeholder="Vidéo étalon">
-      <button onclick="changerVideo('videoB', 'urlB')">🔗 Modifier droite</button>
-      <input type="text" id="timestampEtalon" placeholder="Timestamp dans vidéo étalon (ex: 02:14)">
-    </div>
-  </div>
+    <label for="timestampSync">⏱️ Timestamp de synchronisation (mm:ss)</label>
+    <input type="text" id="timestampSync" placeholder="ex: 12:40" required>
 
-  <button id="saveBtn" onclick="enregistrerSync()">💾 Enregistrer la synchronisation</button>
-  <p id="resultat"></p>
+    <label for="videoEtalon">📹 Lien de la vidéo étalon</label>
+    <input type="text" id="videoEtalon" placeholder="https://youtube.com/..." required>
+
+    <label for="timestampEtalon">⏱️ Timestamp étalon (mm:ss)</label>
+    <input type="text" id="timestampEtalon" placeholder="ex: 06:30" required>
+
+    <button type="submit">💾 Enregistrer la synchronisation</button>
+    <div class="msg" id="confirmation" style="display:none;">✅ Synchronisation enregistrée !</div>
+  </form>
 
   <script>
-    function changerVideo(iframeId, inputId) {
-      const url = document.getElementById(inputId).value;
-      const videoId = extraireID(url);
-      if (videoId) {
-        document.getElementById(iframeId).src = "https://www.youtube.com/embed/" + videoId;
-      } else {
-        alert("Lien invalide ou non reconnu.");
-      }
-    }
+    document.getElementById("syncForm").addEventListener("submit", function (e) {
+      e.preventDefault();
 
-    function extraireID(url) {
-      const ytMatch = url.match(/(?:v=|\/embed\/|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-      return ytMatch ? ytMatch[1] : null;
-    }
-
-    function parseTime(str) {
-      const [m, s] = str.split(":").map(Number);
-      return m * 60 + s;
-    }
-
-    function formatHeure(totalSec) {
-      const h = String(Math.floor(totalSec / 3600) % 24).padStart(2, '0');
-      const m = String(Math.floor((totalSec % 3600) / 60)).padStart(2, '0');
-      const s = String(totalSec % 60).padStart(2, '0');
-      return `${h}:${m}:${s}`;
-    }
-
-    function enregistrerSync() {
       const jour = document.getElementById("jour").value;
-      const heureIRL = document.getElementById("heureIRL").value;
-      const tsEtalonStr = document.getElementById("timestampEtalon").value;
-      const tsSyncStr = document.getElementById("timestampSync").value;
-      const urlA = document.getElementById("urlA").value;
-      const urlB = document.getElementById("urlB").value;
+      const videoSync = document.getElementById("videoSync").value;
+      const timestampSync = document.getElementById("timestampSync").value;
+      const videoEtalon = document.getElementById("videoEtalon").value;
+      const timestampEtalon = document.getElementById("timestampEtalon").value;
+      const irlEtalon = document.getElementById("irlEtalon").value;
 
-      if (!jour || !heureIRL || !tsEtalonStr || !tsSyncStr || !urlA || !urlB) {
-        alert("Veuillez remplir tous les champs.");
-        return;
-      }
+      const tsSyncSec = parseTime(timestampSync);
+      const tsEtalonSec = parseTime(timestampEtalon);
+      const irlEtalonSec = parseTime(irlEtalon, true);
 
-      const tsEtalon = parseTime(tsEtalonStr);
-      const tsSync = parseTime(tsSyncStr);
-      const [h, m] = heureIRL.split(":").map(Number);
-      const baseIRL = h * 3600 + m * 60;
+      const ecart = tsSyncSec - tsEtalonSec;
+      const irlSyncSec = irlEtalonSec + ecart;
+      const irlSync = formatIRL(irlSyncSec);
 
-      const delta = tsEtalon - tsSync;
-      const irlSyncSec = baseIRL - delta;
-      const irlSyncFinal = formatHeure(irlSyncSec);
-
-      const syncData = {
-        videoSync: urlA,
-        videoEtalon: urlB,
-        timestampSync: tsSyncStr,
-        timestampEtalon: tsEtalonStr,
-        irlEtalon: heureIRL + ":00",
-        irlSync: irlSyncFinal,
-        date_enregistrement: new Date().toISOString()
+      const data = {
+        videoSync,
+        timestampSync,
+        videoEtalon,
+        timestampEtalon,
+        irlEtalon,
+        irlSync
       };
 
-      localStorage.setItem("sync_" + jour, JSON.stringify(syncData));
-      document.getElementById("resultat").textContent = `✅ Synchronisation enregistrée pour ${jour} ➜ Vidéo synchronisée démarre à ${irlSyncFinal}`;
+      localStorage.setItem("sync_" + jour, JSON.stringify(data));
+      document.getElementById("confirmation").style.display = "block";
+    });
+
+    function parseTime(str, isIRL = false) {
+      const parts = str.split(":").map(Number).reverse();
+      let sec = 0;
+      if (isIRL) {
+        if (parts.length >= 1) sec += parts[0];
+        if (parts.length >= 2) sec += parts[1] * 60;
+        if (parts.length >= 3) sec += parts[2] * 3600;
+        return sec;
+      } else {
+        if (parts.length >= 1) sec += parts[0];
+        if (parts.length >= 2) sec += parts[1] * 60;
+        return sec;
+      }
+    }
+
+    function formatIRL(seconds) {
+      const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
+      const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+      const s = Math.floor(seconds % 60).toString().padStart(2, '0');
+      return `${h}:${m}:${s}`;
     }
   </script>
 
