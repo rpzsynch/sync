@@ -13,8 +13,22 @@
       text-align: center;
     }
 
-    h1 {
+    .topbar {
+      text-align: left;
       margin-bottom: 20px;
+    }
+
+    .topbar a {
+      color: #28a745;
+      text-decoration: none;
+      border: 1px solid #28a745;
+      padding: 8px 12px;
+      border-radius: 6px;
+    }
+
+    .topbar a:hover {
+      background-color: #28a745;
+      color: white;
     }
 
     select {
@@ -53,12 +67,46 @@
 
     .info {
       font-size: 14px;
+      margin-bottom: 10px;
       color: #ccc;
-      margin-top: 10px;
+    }
+
+    .cards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+      margin-top: 40px;
+    }
+
+    .card {
+      background-color: #222;
+      border-radius: 10px;
+      padding: 20px;
+      width: 300px;
+      text-align: left;
+      box-shadow: 0 0 10px #000;
+    }
+
+    .card h3 {
+      margin-top: 0;
+      font-size: 18px;
+      color: #ffd700;
+    }
+
+    .card p {
+      margin: 5px 0;
+      font-size: 14px;
+    }
+
+    .card a {
+      color: #28a745;
+      text-decoration: underline;
+      font-size: 14px;
     }
 
     .empty {
-      margin-top: 40px;
+      margin-top: 30px;
       font-size: 16px;
       color: #888;
     }
@@ -66,25 +114,37 @@
 </head>
 <body>
 
-  <h1>📺 Lecture synchronisée</h1>
+  <div class="topbar">
+    <a href="index.html">← Retour à l’accueil</a>
+  </div>
+
+  <h1>📺 Lecture synchronisée locale</h1>
   <select id="jourSelect">
     <option value="">Sélectionner un jour</option>
     ${[...Array(14)].map((_, i) => `<option value="Jour ${i + 1}">Jour ${i + 1}</option>`).join('')}
   </select>
 
   <div id="playerContainer"></div>
-  <div class="timeline" id="timeline"><div class="mark" id="marque" style="display:none;"></div></div>
+  <div class="timeline" id="timeline">
+    <div class="mark" id="marque" style="display:none;"></div>
+  </div>
   <div class="info" id="syncInfo"></div>
   <div class="empty" id="emptyMsg" style="display:none;">Aucune synchronisation disponible</div>
 
+  <h2 style="margin-top:50px;">📚 Ma bibliothèque</h2>
+  <div class="cards" id="bibliContainer"></div>
+  <div class="empty" id="emptyBibli" style="display:none;">Aucune donnée enregistrée</div>
+
   <script>
-    document.getElementById("jourSelect").addEventListener("change", function () {
+    const playerContainer = document.getElementById("playerContainer");
+    const marque = document.getElementById("marque");
+    const syncInfo = document.getElementById("syncInfo");
+    const emptyMsg = document.getElementById("emptyMsg");
+    const jourSelect = document.getElementById("jourSelect");
+
+    jourSelect.addEventListener("change", function () {
       const jour = this.value;
       const data = localStorage.getItem("sync_" + jour);
-      const playerContainer = document.getElementById("playerContainer");
-      const marque = document.getElementById("marque");
-      const syncInfo = document.getElementById("syncInfo");
-      const emptyMsg = document.getElementById("emptyMsg");
 
       if (!data) {
         playerContainer.innerHTML = "";
@@ -96,28 +156,61 @@
 
       emptyMsg.style.display = "none";
       const sync = JSON.parse(data);
-      const videoId = extraireID(sync.videoSync);
-      const tsSync = parseTime(sync.timestampSync);
-      const videoDurSec = 7200; // base 2h
-      const timelineWidth = document.getElementById("timeline").offsetWidth;
-      const x = (tsSync / videoDurSec) * timelineWidth;
+      const videoId = extractID(sync.videoSync);
+      const tsSec = parseTime(sync.timestampSync);
+      const videoDur = 7200;
+      const barWidth = document.getElementById("timeline").offsetWidth;
+      const pos = (tsSec / videoDur) * barWidth;
 
       marque.style.display = "block";
-      marque.style.left = `${x}px`;
+      marque.style.left = `${pos}px`;
 
       playerContainer.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}" allowfullscreen></iframe>`;
-      syncInfo.innerText = `📌 Timestamp synchronisé : ${sync.timestampSync} ➜ Heure IRL estimée : ${sync.irlSync}`;
+      syncInfo.innerText = `📌 Timestamp : ${sync.timestampSync} ➜ Heure IRL estimée : ${sync.irlSync}`;
     });
 
     function parseTime(str) {
-      const [m, s] = str.split(":").map(Number);
-      return m * 60 + s;
+      const parts = str.split(":").map(Number).reverse();
+      let sec = 0;
+      if (parts.length >= 1) sec += parts[0];
+      if (parts.length >= 2) sec += parts[1] * 60;
+      if (parts.length >= 3) sec += parts[2] * 3600;
+      return sec;
     }
 
-    function extraireID(url) {
-      const ytMatch = url.match(/(?:v=|\/embed\/|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-      return ytMatch ? ytMatch[1] : null;
+    function extractID(url) {
+      const match = url.match(/(?:v=|\/embed\/|youtu\.be\/)([\w-]{11})/);
+      return match ? match[1] : "";
     }
+
+    function afficherBibli() {
+      const container = document.getElementById("bibliContainer");
+      const empty = document.getElementById("emptyBibli");
+
+      const keys = Object.keys(localStorage)
+        .filter(k => k.startsWith("sync_Jour "))
+        .sort((a, b) => parseInt(a.replace("sync_Jour ", "")) - parseInt(b.replace("sync_Jour ", "")));
+
+      if (keys.length === 0) {
+        empty.style.display = "block";
+        return;
+      }
+
+      keys.forEach(key => {
+        const data = JSON.parse(localStorage.getItem(key));
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          <h3>🎬 ${key.replace("sync_", "")}</h3>
+          <p><strong>Vidéo :</strong> <a href="${data.videoSync}" target="_blank">ouvrir</a></p>
+          <p><strong>Timestamp :</strong> ${data.timestampSync}</p>
+          <p><strong>Heure IRL :</strong> ${data.irlSync}</p>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    afficherBibli();
   </script>
 
 </body>
