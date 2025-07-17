@@ -68,51 +68,25 @@
       text-align: center;
     }
 
-    .back {
-      margin-bottom: 20px;
-      text-align: left;
-    }
-
-    .back a {
-      color: #28a745;
-      text-decoration: none;
-      font-size: 14px;
-      border: 1px solid #28a745;
-      padding: 6px 10px;
-      border-radius: 6px;
-    }
-
-    .back a:hover {
-      background-color: #28a745;
-      color: white;
+    .result {
+      margin-top: 20px;
+      font-size: 16px;
+      color: #ffd700;
+      text-align: center;
     }
   </style>
 </head>
 <body>
 
-  <!-- 🔙 Bouton retour à l’accueil -->
-  <div class="back">
-    <a href="index.html">← Retour à l’accueil</a>
-  </div>
-
   <h1>🧭 Synchroniser deux POVs</h1>
 
   <form id="syncForm">
 
-    <!-- 🧩 Champs Jour + Heure IRL sur une ligne -->
-    <div style="display: flex; gap: 20px;">
-      <div style="flex: 1;">
-        <label for="jour">📅 Jour</label>
-        <select id="jour" required style="width: 100%;">
-          <option value="">Sélectionner...</option>
-          ${[...Array(14)].map((_, i) => `<option value="Jour ${i + 1}">Jour ${i + 1}</option>`).join('')}
-        </select>
-      </div>
-      <div style="flex: 1;">
-        <label for="irlEtalon">🕰️ Heure IRL du croisement (HH:mm:ss)</label>
-        <input type="text" id="irlEtalon" placeholder="ex: 18:42:16" required style="width: 100%;">
-      </div>
-    </div>
+    <label for="jour">📅 Jour</label>
+    <input type="text" id="jour" placeholder="ex: Jour 3" required>
+
+    <label for="irlEtalon">🕰️ Heure IRL du croisement (HH:mm:ss)</label>
+    <input type="text" id="irlEtalon" placeholder="ex: 18:42:16" required>
 
     <label for="videoSync">📹 Lien de la vidéo à synchroniser</label>
     <input type="text" id="videoSync" placeholder="https://youtube.com/..." required>
@@ -129,6 +103,8 @@
     <button type="submit">💾 Enregistrer la synchronisation</button>
     <div class="msg" id="confirmation" style="display:none;">✅ Synchronisation enregistrée !</div>
   </form>
+
+  <div class="result" id="resultIRL" style="display:none;"></div>
 
   <script>
     document.getElementById("syncForm").addEventListener("submit", function (e) {
@@ -160,6 +136,8 @@
 
       localStorage.setItem("sync_" + jour, JSON.stringify(data));
       document.getElementById("confirmation").style.display = "block";
+      document.getElementById("resultIRL").innerText = `🕰️ Heure IRL estimée : ${irlSync}`;
+      document.getElementById("resultIRL").style.display = "block";
     });
 
     function parseTime(str, isIRL = false) {
