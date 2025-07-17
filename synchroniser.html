@@ -115,6 +115,11 @@
 </head>
 <body>
 
+  <!-- 🔙 Bouton retour à l’accueil -->
+  <div style="width: 100%; text-align: left; margin-bottom: 10px;">
+    <a href="index.html" style="color: #eee; text-decoration: underline; font-size: 16px;">← Retour à l’accueil</a>
+  </div>
+
   <div class="videos">
     <div class="video-block">
       <iframe id="videoA" src="https://www.youtube.com/embed/" allowfullscreen></iframe>
@@ -132,8 +137,7 @@
     </div>
 
     <div class="center-group">
-     <input type="text" id="jour" placeholder="Jour (ex: Jour 3)" required>
-
+      <input type="text" id="jour" placeholder="Jour (ex: Jour 3)" required>
       <input type="time" id="heureIRL">
     </div>
 
@@ -208,7 +212,10 @@
       };
 
       localStorage.setItem("sync_" + jour, JSON.stringify(syncData));
-      document.getElementById("resultat").textContent = `✅ Synchronisation enregistrée pour ${jour} ➜ Vidéo synchronisée démarre à ${irlSyncFinal}`;
+      document.getElementById("resultat").innerHTML = `
+        ✅ Synchronisation enregistrée pour ${jour} ➜ Vidéo synchronisée démarre à ${irlSyncFinal}<br><br>
+        <a href="voir.html" style="color: #eee; text-decoration: underline; font-size: 16px;">📺 Voir la synchronisation</a>
+      `;
     }
   </script>
 
