@@ -2,76 +2,50 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>SynchroPOV</title>
+  <title>RPZ Synch</title>
   <style>
     body {
-      font-family: sans-serif;
-      background-color: #000;
+      background-color: #121212;
       color: #eee;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
+      font-family: sans-serif;
+      text-align: center;
+      padding: 50px;
     }
 
-    img.logo {
-      width: 180px;
+    h1 {
+      color: #00ffd0;
       margin-bottom: 30px;
     }
 
-    .container {
-      display: flex;
-      gap: 40px;
+    p {
+      font-size: 18px;
+      margin-bottom: 40px;
     }
 
-    .box {
-      width: 300px;
-      height: 200px;
-      background-color: #1a1a1a;
-      border-radius: 10px;
-      box-shadow: 0 0 15px rgba(255,255,255,0.05);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      cursor: pointer;
-      transition: transform 0.3s;
-      color: #eee;
+    a.button {
+      display: inline-block;
+      margin: 10px;
+      padding: 12px 24px;
+      font-size: 16px;
+      color: white;
+      background-color: #28a745;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: background-color 0.3s;
     }
 
-    .box:hover {
-      transform: scale(1.05);
-    }
-
-    .box h2 {
-      margin: 0;
-      font-size: 24px;
-    }
-
-    .box p {
-      margin-top: 10px;
-      font-size: 14px;
-      text-align: center;
+    a.button:hover {
+      background-color: #218838;
     }
   </style>
 </head>
 <body>
 
-  <!-- 🔗 Ton logo ici -->
-  <img src="logo.png" alt="Logo SynchroPOV" class="logo">
+  <h1>Bienvenue sur RPZ Synch</h1>
+  <p>Synchronisez vos POVs et retrouvez l’instant IRL exact.</p>
 
-  <div class="container">
-    <div class="box" onclick="alert('Voir POV: bientôt disponible')">
-      <h2>👁️ Voir POV</h2>
-      <p>Explorer les vidéos synchronisées</p>
-    </div>
-    <div class="box" onclick="alert('Synchroniser POV: bientôt disponible')">
-      <h2>🧭 Synchroniser POV</h2>
-      <p>Ajouter ma position et les croisements</p>
-    </div>
-  </div>
+  <a href="synchroniser.html" class="button">🔁 Synchroniser une POV</a>
+  <a href="voir.html" class="button">📺 Voir une synchronisation</a>
 
 </body>
 </html>
