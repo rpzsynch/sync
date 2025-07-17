@@ -132,10 +132,8 @@
     </div>
 
     <div class="center-group">
-      <select id="jour">
-        <option value="">Jour</option>
-        ${[...Array(14)].map((_, i) => `<option value="Jour ${i + 1}">Jour ${i + 1}</option>`).join('')}
-      </select>
+     <input type="text" id="jour" placeholder="Jour (ex: Jour 3)" required>
+
       <input type="time" id="heureIRL">
     </div>
 
