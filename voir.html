@@ -5,70 +5,47 @@
   <title>Voir POV synchronisée</title>
   <style>
     body {
-      background-color: #111;
+      background-color: #000;
       color: #eee;
       font-family: sans-serif;
       margin: 0;
-      padding: 20px;
+      padding: 0;
       text-align: center;
     }
 
-    .topbar {
-      text-align: left;
-      margin-bottom: 20px;
+    #playerWrapper {
+      position: relative;
+      width: 100%;
+      max-width: 1280px;
+      margin: auto;
+      aspect-ratio: 16/9;
+      background-color: #000;
     }
 
-    .topbar a {
-      color: #28a745;
-      text-decoration: none;
-      border: 1px solid #28a745;
-      padding: 8px 12px;
-      border-radius: 6px;
+    #player {
+      width: 100%;
+      height: 100%;
     }
 
-    .topbar a:hover {
-      background-color: #28a745;
+    #overlayTime {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 32px;
       color: white;
+      text-shadow: 2px 2px 4px black;
+      background-color: rgba(0, 0, 0, 0.4);
+      padding: 6px 12px;
+      border-radius: 8px;
     }
 
     select {
+      margin: 20px auto;
       padding: 10px;
       font-size: 16px;
       border-radius: 5px;
       border: none;
-      margin-bottom: 20px;
-    }
-
-    iframe {
-      width: 100%;
-      max-width: 800px;
-      height: 450px;
-      border: none;
-      margin-bottom: 30px;
-    }
-
-    .timeline {
-      position: relative;
-      width: 100%;
-      max-width: 800px;
-      height: 8px;
-      background-color: #444;
-      margin: 0 auto 20px;
-      border-radius: 4px;
-    }
-
-    .mark {
-      position: absolute;
-      top: -6px;
-      width: 2px;
-      height: 20px;
-      background-color: red;
-    }
-
-    .info {
-      font-size: 14px;
-      margin-bottom: 10px;
-      color: #ccc;
     }
 
     .cards {
@@ -76,11 +53,11 @@
       flex-wrap: wrap;
       gap: 20px;
       justify-content: center;
-      margin-top: 40px;
+      margin: 40px 20px;
     }
 
     .card {
-      background-color: #222;
+      background-color: #1a1a1a;
       border-radius: 10px;
       padding: 20px;
       width: 300px;
@@ -114,60 +91,53 @@
 </head>
 <body>
 
-  <div class="topbar">
-    <a href="index.html">← Retour à l’accueil</a>
-  </div>
+  <h1 style="margin: 20px 0;">📺 Lecture synchronisée</h1>
 
-  <h1>📺 Lecture synchronisée locale</h1>
   <select id="jourSelect">
     <option value="">Sélectionner un jour</option>
-    ${[...Array(14)].map((_, i) => `<option value="Jour ${i + 1}">Jour ${i + 1}</option>`).join('')}
   </select>
 
-  <div id="playerContainer"></div>
-  <div class="timeline" id="timeline">
-    <div class="mark" id="marque" style="display:none;"></div>
+  <div id="playerWrapper">
+    <div id="player"></div>
+    <div id="overlayTime">--:--:--</div>
   </div>
-  <div class="info" id="syncInfo"></div>
-  <div class="empty" id="emptyMsg" style="display:none;">Aucune synchronisation disponible</div>
 
-  <h2 style="margin-top:50px;">📚 Ma bibliothèque</h2>
+  <h2 style="margin-top:60px;">📚 Ma bibliothèque</h2>
   <div class="cards" id="bibliContainer"></div>
   <div class="empty" id="emptyBibli" style="display:none;">Aucune donnée enregistrée</div>
 
+  <script src="https://www.youtube.com/iframe_api"></script>
   <script>
-    const playerContainer = document.getElementById("playerContainer");
-    const marque = document.getElementById("marque");
-    const syncInfo = document.getElementById("syncInfo");
-    const emptyMsg = document.getElementById("emptyMsg");
+    let player;
+    let syncData = null;
+    let interval = null;
+
     const jourSelect = document.getElementById("jourSelect");
+    const overlayTime = document.getElementById("overlayTime");
+
+    const keys = Object.keys(localStorage).filter(k => k.startsWith("sync_"));
+    keys.forEach(key => {
+      const jour = key.replace("sync_", "");
+      const option = document.createElement("option");
+      option.value = jour;
+      option.textContent = jour;
+      jourSelect.appendChild(option);
+    });
 
     jourSelect.addEventListener("change", function () {
       const jour = this.value;
       const data = localStorage.getItem("sync_" + jour);
+      if (!data) return;
 
-      if (!data) {
-        playerContainer.innerHTML = "";
-        marque.style.display = "none";
-        syncInfo.innerText = "";
-        emptyMsg.style.display = "block";
-        return;
-      }
-
-      emptyMsg.style.display = "none";
-      const sync = JSON.parse(data);
-      const videoId = extractID(sync.videoSync);
-      const tsSec = parseTime(sync.timestampSync);
-      const videoDur = 7200;
-      const barWidth = document.getElementById("timeline").offsetWidth;
-      const pos = (tsSec / videoDur) * barWidth;
-
-      marque.style.display = "block";
-      marque.style.left = `${pos}px`;
-
-      playerContainer.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}" allowfullscreen></iframe>`;
-      syncInfo.innerText = `📌 Timestamp : ${sync.timestampSync} ➜ Heure IRL estimée : ${sync.irlSync}`;
+      syncData = JSON.parse(data);
+      const videoId = extractID(syncData.videoSync);
+      loadVideo(videoId);
     });
+
+    function extractID(url) {
+      const match = url.match(/(?:v=|\/embed\/|youtu\.be\/)([\w-]{11})/);
+      return match ? match[1] : "";
+    }
 
     function parseTime(str) {
       const parts = str.split(":").map(Number).reverse();
@@ -178,9 +148,49 @@
       return sec;
     }
 
-    function extractID(url) {
-      const match = url.match(/(?:v=|\/embed\/|youtu\.be\/)([\w-]{11})/);
-      return match ? match[1] : "";
+    function formatTime(sec) {
+      const h = String(Math.floor(sec / 3600)).padStart(2, '0');
+      const m = String(Math.floor((sec % 3600) / 60)).padStart(2, '0');
+      const s = String(Math.floor(sec % 60)).padStart(2, '0');
+      return `${h}:${m}:${s}`;
+    }
+
+    function loadVideo(videoId) {
+      if (player) {
+        player.loadVideoById(videoId);
+      } else {
+        player = new YT.Player('player', {
+          videoId: videoId,
+          events: {
+            onReady: startTracking,
+            onStateChange: handleState
+          }
+        });
+      }
+    }
+
+    function startTracking() {
+      updateOverlay(); // initial
+      interval = setInterval(updateOverlay, 1000);
+    }
+
+    function handleState(event) {
+      if (event.data === YT.PlayerState.PLAYING) {
+        if (!interval) interval = setInterval(updateOverlay, 1000);
+      } else {
+        clearInterval(interval);
+        interval = null;
+      }
+    }
+
+    function updateOverlay() {
+      if (!player || !syncData) return;
+
+      const currentTime = player.getCurrentTime();
+      const tsSync = parseTime(syncData.timestampSync);
+      const irlBase = parseTime(syncData.irlSync, true);
+      const irlNow = irlBase + (currentTime - tsSync);
+      overlayTime.textContent = formatTime(irlNow);
     }
 
     function afficherBibli() {
@@ -188,8 +198,8 @@
       const empty = document.getElementById("emptyBibli");
 
       const keys = Object.keys(localStorage)
-        .filter(k => k.startsWith("sync_Jour "))
-        .sort((a, b) => parseInt(a.replace("sync_Jour ", "")) - parseInt(b.replace("sync_Jour ", "")));
+        .filter(k => k.startsWith("sync_"))
+        .sort();
 
       if (keys.length === 0) {
         empty.style.display = "block";
