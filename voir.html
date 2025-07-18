@@ -63,6 +63,7 @@
       width: 300px;
       text-align: left;
       box-shadow: 0 0 10px #000;
+      position: relative;
     }
 
     .card h3 {
@@ -80,6 +81,23 @@
       color: #28a745;
       text-decoration: underline;
       font-size: 14px;
+    }
+
+    .deleteBtn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background-color: #ff4444;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .deleteBtn:hover {
+      background-color: #cc0000;
     }
 
     .empty {
@@ -115,14 +133,17 @@
     const jourSelect = document.getElementById("jourSelect");
     const overlayTime = document.getElementById("overlayTime");
 
-    const keys = Object.keys(localStorage).filter(k => k.startsWith("sync_"));
-    keys.forEach(key => {
-      const jour = key.replace("sync_", "");
-      const option = document.createElement("option");
-      option.value = jour;
-      option.textContent = jour;
-      jourSelect.appendChild(option);
-    });
+    function refreshJourSelect() {
+      jourSelect.innerHTML = '<option value="">Sélectionner un jour</option>';
+      const keys = Object.keys(localStorage).filter(k => k.startsWith("sync_"));
+      keys.forEach(key => {
+        const jour = key.replace("sync_", "");
+        const option = document.createElement("option");
+        option.value = jour;
+        option.textContent = jour;
+        jourSelect.appendChild(option);
+      });
+    }
 
     jourSelect.addEventListener("change", function () {
       const jour = this.value;
@@ -170,7 +191,7 @@
     }
 
     function startTracking() {
-      updateOverlay(); // initial
+      updateOverlay();
       interval = setInterval(updateOverlay, 1000);
     }
 
@@ -188,7 +209,7 @@
 
       const currentTime = player.getCurrentTime();
       const tsSync = parseTime(syncData.timestampSync);
-      const irlBase = parseTime(syncData.irlSync, true);
+      const irlBase = parseTime(syncData.irlSync);
       const irlNow = irlBase + (currentTime - tsSync);
       overlayTime.textContent = formatTime(irlNow);
     }
@@ -196,6 +217,7 @@
     function afficherBibli() {
       const container = document.getElementById("bibliContainer");
       const empty = document.getElementById("emptyBibli");
+      container.innerHTML = "";
 
       const keys = Object.keys(localStorage)
         .filter(k => k.startsWith("sync_"))
@@ -206,6 +228,8 @@
         return;
       }
 
+      empty.style.display = "none";
+
       keys.forEach(key => {
         const data = JSON.parse(localStorage.getItem(key));
         const card = document.createElement("div");
@@ -215,12 +239,20 @@
           <p><strong>Vidéo :</strong> <a href="${data.videoSync}" target="_blank">ouvrir</a></p>
           <p><strong>Timestamp :</strong> ${data.timestampSync}</p>
           <p><strong>Heure IRL :</strong> ${data.irlSync}</p>
+          <button class="deleteBtn" onclick="supprimerSync('${key}')">🗑️ Supprimer</button>
         `;
         container.appendChild(card);
       });
     }
 
+    function supprimerSync(key) {
+      localStorage.removeItem(key);
+      afficherBibli();
+      refreshJourSelect();
+    }
+
     afficherBibli();
+    refreshJourSelect();
   </script>
 
 </body>
