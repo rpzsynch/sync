@@ -130,7 +130,7 @@
     <div class="edit-group">
       <input type="text" id="urlA" placeholder="Vidéo à synchroniser">
       <button onclick="changerVideo('videoA', 'urlA')">🔗 Modifier gauche</button>
-      <input type="text" id="timestampA" placeholder="Timestamp dans vidéo A (ex: 01:52)">
+      <input type="text" id="timestampA" placeholder="Timestamp dans vidéo A (ex: 57:13)">
     </div>
 
     <div class="center-group">
@@ -141,7 +141,7 @@
     <div class="edit-group">
       <input type="text" id="urlB" placeholder="Vidéo étalon">
       <button onclick="changerVideo('videoB', 'urlB')">🔗 Modifier droite</button>
-      <input type="text" id="timestampB" placeholder="Timestamp dans vidéo B (ex: 02:14)">
+      <input type="text" id="timestampB" placeholder="Timestamp dans vidéo B (ex: 46:51)">
     </div>
   </div>
 
@@ -164,54 +164,34 @@
       return ytMatch ? ytMatch[1] : null;
     }
 
-    function parseTime(str) {
-      const [m, s] = str.split(":").map(Number);
-      return m * 60 + s;
-    }
-
-    function formatHeure(totalSec) {
-      const h = String(Math.floor(totalSec / 3600) % 24).padStart(2, '0');
-      const m = String(Math.floor((totalSec % 3600) / 60)).padStart(2, '0');
-      const s = String(totalSec % 60).padStart(2, '0');
-      return `${h}:${m}:${s}`;
-    }
-
     function synchroniser() {
       const jour = document.getElementById("jour").value;
       const heureIRL = document.getElementById("heureIRL").value;
-      const tsEtalonStr = document.getElementById("timestampB").value;
-      const tsSyncStr = document.getElementById("timestampA").value;
+      const timestampA = document.getElementById("timestampA").value;
+      const timestampB = document.getElementById("timestampB").value;
       const urlA = document.getElementById("urlA").value;
       const urlB = document.getElementById("urlB").value;
 
-      if (!jour || !heureIRL || !tsEtalonStr || !tsSyncStr || !urlA || !urlB) {
+      if (!jour || !heureIRL || !timestampA || !timestampB || !urlA || !urlB) {
         alert("Veuillez remplir tous les champs.");
         return;
       }
 
-      const tsEtalon = parseTime(tsEtalonStr);
-      const tsSync = parseTime(tsSyncStr);
-      const [h, m] = heureIRL.split(":").map(Number);
-      const baseIRL = h * 3600 + m * 60;
-
-      const delta = tsSync - tsEtalon;
-      const irlSyncSec = baseIRL + delta;
-      const irlSyncFinal = formatHeure(irlSyncSec);
+      const irlSync = heureIRL + ":00";
 
       const syncData = {
         videoSync: urlA,
         videoEtalon: urlB,
-        timestampSync: tsSyncStr,
-        timestampEtalon: tsEtalonStr,
-        irlEtalon: heureIRL + ":00",
-        irlSync: irlSyncFinal,
+        timestampSync: timestampA,
+        timestampEtalon: timestampB,
+        irlSync: irlSync,
         date_enregistrement: new Date().toISOString()
       };
 
       localStorage.setItem("sync_" + jour, JSON.stringify(syncData));
       document.getElementById("resultat").innerHTML = `
         ✅ Synchronisation enregistrée pour ${jour}<br>
-        🕰️ Heure IRL estimée : <strong>${irlSyncFinal}</strong>
+        🕰️ Heure IRL à ${timestampA} dans A : <strong>${irlSync}</strong>
       `;
     }
   </script>
