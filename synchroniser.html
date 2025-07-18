@@ -5,40 +5,78 @@
   <title>Synchroniser POV</title>
   <style>
     body {
-      font-family: sans-serif;
+      margin: 0;
+      padding: 20px;
       background-color: #000;
       color: #eee;
-      padding: 20px;
-      text-align: center;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
-    .row {
-      display: flex;
-      justify-content: center;
-      gap: 40px;
+    h1 {
       margin-bottom: 20px;
     }
 
-    .group {
+    .videos {
       display: flex;
-      flex-direction: column;
-      width: 300px;
+      width: 100%;
+      max-width: 1200px;
+      gap: 20px;
     }
 
-    input, select, button {
-      padding: 10px;
-      font-size: 16px;
-      margin-bottom: 10px;
-      border-radius: 5px;
+    .video-block {
+      flex: 1;
+    }
+
+    iframe {
+      width: 100%;
+      height: 300px;
       border: none;
     }
 
+    .edit-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      width: 100%;
+      max-width: 1200px;
+      margin-top: 20px;
+    }
+
+    .edit-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 30%;
+    }
+
+    .center-group {
+      width: 30%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    input[type="text"], button, select, input[type="time"] {
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 5px;
+      border: none;
+      width: 100%;
+      margin-bottom: 10px;
+    }
+
     #saveBtn {
+      margin-top: 25px;
+      padding: 18px 35px;
+      font-size: 22px;
       background-color: #28a745;
       color: white;
-      font-size: 18px;
-      padding: 12px 30px;
-      border-radius: 8px;
+      border: none;
+      border-radius: 10px;
       cursor: pointer;
     }
 
@@ -46,10 +84,32 @@
       background-color: #218838;
     }
 
-    #result {
-      margin-top: 20px;
-      font-size: 18px;
+    #resultat {
+      text-align: center;
+      margin-top: 15px;
+      font-size: 16px;
       color: #ffd700;
+    }
+
+    @media (max-width: 900px) {
+      .videos {
+        flex-direction: column;
+      }
+
+      .edit-row {
+        flex-direction: column;
+        gap: 20px;
+        align-items: center;
+      }
+
+      .edit-group, .center-group {
+        width: 100%;
+      }
+
+      #saveBtn {
+        width: 100%;
+        max-width: 320px;
+      }
     }
   </style>
 </head>
@@ -57,77 +117,101 @@
 
   <h1>🧭 Synchroniser deux POVs</h1>
 
-  <div class="row">
-    <div class="group">
+  <div class="videos">
+    <div class="video-block">
+      <iframe id="videoA" src="https://www.youtube.com/embed/" allowfullscreen></iframe>
+    </div>
+    <div class="video-block">
+      <iframe id="videoB" src="https://www.youtube.com/embed/" allowfullscreen></iframe>
+    </div>
+  </div>
+
+  <div class="edit-row">
+    <div class="edit-group">
       <input type="text" id="urlA" placeholder="Vidéo à synchroniser">
+      <button onclick="changerVideo('videoA', 'urlA')">🔗 Modifier gauche</button>
       <input type="text" id="timestampA" placeholder="Timestamp dans vidéo A (ex: 01:52)">
     </div>
 
-    <div class="group">
-      <input type="text" id="urlB" placeholder="Vidéo étalon">
-      <input type="text" id="timestampB" placeholder="Timestamp dans vidéo B (ex: 02:14)">
+    <div class="center-group">
+      <input type="text" id="jour" placeholder="Jour (ex: Jour 3)">
       <input type="time" id="heureIRL">
     </div>
 
-    <div class="group">
-      <input type="text" id="jour" placeholder="Jour (ex: Jour 3)">
+    <div class="edit-group">
+      <input type="text" id="urlB" placeholder="Vidéo étalon">
+      <button onclick="changerVideo('videoB', 'urlB')">🔗 Modifier droite</button>
+      <input type="text" id="timestampB" placeholder="Timestamp dans vidéo B (ex: 02:14)">
     </div>
   </div>
 
   <button id="saveBtn" onclick="synchroniser()">💾 Enregistrer la synchronisation</button>
-  <div id="result"></div>
+  <p id="resultat"></p>
 
   <script>
-    function parseTime(str) {
-      const parts = str.split(":").map(Number).reverse();
-      let sec = 0;
-      if (parts.length >= 1) sec += parts[0];
-      if (parts.length >= 2) sec += parts[1] * 60;
-      if (parts.length >= 3) sec += parts[2] * 3600;
-      return sec;
+    function changerVideo(iframeId, inputId) {
+      const url = document.getElementById(inputId).value;
+      const videoId = extraireID(url);
+      if (videoId) {
+        document.getElementById(iframeId).src = "https://www.youtube.com/embed/" + videoId;
+      } else {
+        alert("Lien invalide ou non reconnu.");
+      }
     }
 
-    function formatTime(sec) {
-      const h = String(Math.floor(sec / 3600)).padStart(2, '0');
-      const m = String(Math.floor((sec % 3600) / 60)).padStart(2, '0');
-      const s = String(Math.floor(sec % 60)).padStart(2, '0');
+    function extraireID(url) {
+      const ytMatch = url.match(/(?:v=|\/embed\/|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+      return ytMatch ? ytMatch[1] : null;
+    }
+
+    function parseTime(str) {
+      const [m, s] = str.split(":").map(Number);
+      return m * 60 + s;
+    }
+
+    function formatHeure(totalSec) {
+      const h = String(Math.floor(totalSec / 3600) % 24).padStart(2, '0');
+      const m = String(Math.floor((totalSec % 3600) / 60)).padStart(2, '0');
+      const s = String(totalSec % 60).padStart(2, '0');
       return `${h}:${m}:${s}`;
     }
 
     function synchroniser() {
+      const jour = document.getElementById("jour").value;
+      const heureIRL = document.getElementById("heureIRL").value;
+      const tsEtalonStr = document.getElementById("timestampB").value;
+      const tsSyncStr = document.getElementById("timestampA").value;
       const urlA = document.getElementById("urlA").value;
       const urlB = document.getElementById("urlB").value;
-      const tsA = parseTime(document.getElementById("timestampA").value);
-      const tsB = parseTime(document.getElementById("timestampB").value);
-      const heureIRL = document.getElementById("heureIRL").value;
-      const jour = document.getElementById("jour").value;
 
-      if (!urlA || !urlB || !tsA || !tsB || !heureIRL || !jour) {
+      if (!jour || !heureIRL || !tsEtalonStr || !tsSyncStr || !urlA || !urlB) {
         alert("Veuillez remplir tous les champs.");
         return;
       }
 
+      const tsEtalon = parseTime(tsEtalonStr);
+      const tsSync = parseTime(tsSyncStr);
       const [h, m] = heureIRL.split(":").map(Number);
       const baseIRL = h * 3600 + m * 60;
 
-      const delta = tsA - tsB;
+      const delta = tsSync - tsEtalon;
       const irlSyncSec = baseIRL + delta;
-      const irlSync = formatTime(irlSyncSec);
+      const irlSyncFinal = formatHeure(irlSyncSec);
 
       const syncData = {
         videoSync: urlA,
         videoEtalon: urlB,
-        timestampSync: document.getElementById("timestampA").value,
-        timestampEtalon: document.getElementById("timestampB").value,
+        timestampSync: tsSyncStr,
+        timestampEtalon: tsEtalonStr,
         irlEtalon: heureIRL + ":00",
-        irlSync: irlSync,
+        irlSync: irlSyncFinal,
         date_enregistrement: new Date().toISOString()
       };
 
       localStorage.setItem("sync_" + jour, JSON.stringify(syncData));
-      document.getElementById("result").innerHTML = `
+      document.getElementById("resultat").innerHTML = `
         ✅ Synchronisation enregistrée pour ${jour}<br>
-        🕰️ Heure IRL estimée : <strong>${irlSync}</strong>
+        🕰️ Heure IRL estimée : <strong>${irlSyncFinal}</strong>
       `;
     }
   </script>
