@@ -13,6 +13,19 @@
       text-align: center;
     }
 
+    a.homeBtn {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background-color: #333;
+      color: #eee;
+      padding: 10px 16px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 16px;
+      box-shadow: 0 0 5px #000;
+    }
+
     #playerWrapper {
       position: relative;
       width: 100%;
@@ -108,6 +121,8 @@
   </style>
 </head>
 <body>
+
+  <a href="index.html" class="homeBtn">🏠 Retour à l'accueil</a>
 
   <h1 style="margin: 20px 0;">📺 Lecture synchronisée</h1>
 
@@ -208,10 +223,10 @@
       if (!player || !syncData) return;
 
       const currentTime = player.getCurrentTime();
-      const tsSync = parseTime(syncData.timestampSync);
-      const irlBase = parseTime(syncData.irlSync);
-      const irlNow = irlBase + (currentTime - tsSync);
-      overlayTime.textContent = formatTime(irlNow);
+      const tsCroisement = parseTime(syncData.timestampSync);
+      const heureCroisement = parseTime(syncData.irlSync);
+      const heureIRL = heureCroisement + (currentTime - tsCroisement);
+      overlayTime.textContent = formatTime(heureIRL);
     }
 
     function afficherBibli() {
